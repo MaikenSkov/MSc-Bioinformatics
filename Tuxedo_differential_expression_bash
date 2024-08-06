@@ -1,0 +1,47 @@
+#! /bin/bash
+#PBS -l nodes=1:ppn=4:centos7,cput=24:00:00,walltime=48:00:00
+#PBS -N assessment_2938235s
+#PBS -d /export/home/biostuds/2938235s/BIOL5177/assessment1
+#PBS -m abe
+#PBS -M 2938235s@student.gla.ac.uk
+#PBS -q bioinf-stud
+
+# RESOURCE FILES
+adapter=/export/projects/polyomics/biostuds/data/illumina_adapter.fa
+hs2index=/export/projects/polyomics/Genome/Mus_musculus/mm10/Hisat2Index/chr2
+gtf=/export/projects/polyomics/Genome/Mus_musculus/mm10/annotations/chr2.gtf
+data=/export/home/biostuds/2938235s/BIOL5177/assessment1/data
+
+#MAKING SUBDIRECTORIES
+hisat_dir=/export/home/biostuds/2938235s/BIOL5177/assessment1/hisat
+stringtie_dir=/export/home/biostuds/2938235s/BIOL5177/assessment1/stringtie
+mkdir -p ${hisat_dir} 
+mkdir -p ${stringtie_dir}
+
+#MAKING FINAL GTF LIST AND DELETES IF EXIST, SO NOT TO APPEND TO OLD FILE
+gtflist='list.gtf.txt'
+rm -f ${gtflist}
+
+#LOOPING OVER SAMPLES
+for sample in s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12
+do
+	sample=${sample}.c2
+	fastq=${data}/${sample}.fq
+	trim1=${sample}.t1.fq
+	trim2=${sample}.t2.fq
+	sam=${hisat_dir}/${sample}.sam
+	bam=${hisat_dir}/${sample}.bam
+	sorted_bam=${hisat_dir}/${sample}.sort.bam 
+	scythe -o ${trim1} -a ${adapter} -q sanger ${fastq}
+	sickle se -f ${trim1} -t sanger -o ${trim2} -q 10 -l 51
+	hisat2 -p 8 --phred33 -x ${hs2index} -q ${trim2} --rna-strandness R -S ${sam}
+	samtools view -b -o ${bam} ${sam}
+	samtools sort -o ${sorted_bam} ${bam}
+	rm ${sam} ${bam} ${trim1} ${trim2}
+	str_smp_dir=${stringtie_dir}/${sample}
+	mkdir -p ${str_smp_dir}
+	stringtie -p 8 -B -e  -G ${gtf} --rf -o ${str_smp_dir}/${sample}.gtf ${sorted_bam}
+	gtfline="${sample} ${str_smp_dir}/${sample}.gtf"
+	echo ${gtfline} >> ${gtflist}
+done
+prepDE.py -i ${gtflist}

@@ -1,0 +1,35 @@
+CREATE TABLE Subject (
+SubjectID VARCHAR,
+Sex CHAR,
+Age INT,
+BMI DECIMAL,
+IR_IS_classfication CHAR,
+PRIMARY KEY (SubjectID)
+);
+
+CREATE TABLE Measurement (
+MeasurementID VARCHAR,
+SubjectID VARCHAR,
+VisitID INT,
+EntityID VARCHAR,
+Omics_type VARCHAR,
+Abundance DECIMAL,
+PRIMARY KEY (MeasurementID)
+FOREIGN KEY (SubjectID) REFERENCES Subject (SubjectID)
+);
+
+CREATE TABLE Metabolite (
+Metabolite_ID VARCHAR,
+Metabolite_name VARCHAR,
+KEGG_ID VARCHAR,
+HMDB_ID VARCHAR,
+Pathway VARCHAR,
+PRIMARY KEY (Metabolite_ID)
+);
+
+CREATE TABLE Identified_As (
+PeakID VARCHAR,
+MetaboliteID VARCHAR,
+FOREIGN KEY (PeakID) REFERENCES Measurement(EntityID)
+FOREIGN KEY (MetaboliteID) REFERENCES Metabolite(Metabolite_ID)
+);

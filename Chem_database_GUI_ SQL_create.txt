@@ -1,0 +1,16 @@
+CREATE TABLE Molecule (
+CdID INT, 
+Smiles VARCHAR,
+Mol_weight DECIMAL,
+LogP DECIMAL,
+Atom_number INT,
+H_bond_donors INT,
+rotatable_bonds INT,
+Ring_count INT,
+Bioavailable BIT,
+Lipinsky BIT,
+Lead_likeness BIT,
+Binary_structure BLOB,
+H_bond_acceptors INT,
+Name VARCHAR,
+PRIMARY KEY (CdID));
